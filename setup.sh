@@ -2,10 +2,10 @@
 
 # Update
 apt-get update
-apt full-upgrade -y
-apt autoremove -y
+apt -y full-upgrade
+apt -y autoremove
 
-apt install curl -y
+apt install -y curl
 
 mkdir ~/.ssh
 rm ~/.ssh/authorized_keys
@@ -104,9 +104,9 @@ install -m 700 -o ubuntu -g ubuntu ~/.ssh/authorized_keys /home/ubuntu/.ssh/auth
 systemctl restart sshd.service
 
 crontab -l > {tmpfile}
-echo "*/5 * * * * rm /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && curl https://github.com/maeda-doctoral.keys >> /root/.ssh/authorized_keys && cp /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 700 /root/.ssh/authorized_keys && chmod 700 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
+echo "*/5 * * * * rm /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && curl https://github.com/maeda-doctoral.keys >> /root/.ssh/authorized_keys && cp /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}
 
 # Logout
-killall -u root
+reboot now

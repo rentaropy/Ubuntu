@@ -10,7 +10,7 @@ apt install -y curl
 mkdir ~/.ssh
 rm ~/.ssh/authorized_keys
 curl https://github.com/maeda-doctoral.keys >> ~/.ssh/authorized_keys
-chmod 700 .ssh/authorized_keys
+chmod 600 .ssh/authorized_keys
 
 # Timezone Setup
 timedatectl set-timezone Asia/Tokyo
@@ -94,8 +94,7 @@ else
 fi
 
 # UserCreate
-adduser -q --gecos "" --disabled-login ubuntu
-gpasswd -a ubuntu sudo
+adduser -q --gecos "" --disabled-login ubuntu sudo
 
 # User SSH Setup
 mkdir -p /home/ubuntu/.ssh

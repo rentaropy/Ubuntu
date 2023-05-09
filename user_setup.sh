@@ -4,6 +4,7 @@
 sudo apt-get update
 sudo apt full-upgrade -y
 sudo apt autoremove -y
+sudo apt install -y curl
 
 # Timezone Setup
 sudo timedatectl set-timezone Asia/Tokyo
@@ -92,7 +93,7 @@ sudo chown ubuntu:ubuntu /home/ubuntu/.ssh
 sudo rm /home/ubuntu/.ssh/authorized_keys
 curl https://github.com/maeda-doctoral.keys >> /home/ubuntu/.ssh/authorized_keys
 sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
-sudo chmod 700 /home/ubuntu/.ssh/authorized_keys
+sudo chmod 600 /home/ubuntu/.ssh/authorized_keys
 sudo systemctl restart sshd.service
 
 # Logout

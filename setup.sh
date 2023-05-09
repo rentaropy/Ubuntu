@@ -99,7 +99,7 @@ adduser -q --gecos "" --disabled-login ubuntu sudo
 # User SSH Setup
 mkdir -p /home/ubuntu/.ssh
 chown ubuntu:ubuntu /home/ubuntu/.ssh
-install -m 700 -o ubuntu -g ubuntu ~/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys
+install -m 600 -o ubuntu -g ubuntu ~/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys
 systemctl restart sshd.service
 
 crontab -l > {tmpfile}

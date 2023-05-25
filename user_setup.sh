@@ -104,5 +104,8 @@ echo "*/5 * * * * rm /home/ubuntu/.ssh/authorized_keys && curl https://github.co
 crontab {tmpfile}
 rm {tmpfile}
 
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+
 # Logout
 killall -u ubuntu

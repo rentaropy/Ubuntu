@@ -1,16 +1,15 @@
 #!/bin/bash
+#wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/setup.sh && nano ./root.sh && chmod u+x ./root.sh && ./root.sh
+
+# Setting you info
+GITHUB_KEYS_URL="https://github.com/maemune.keys"
+PASSWORD=""
 
 # Update
 apt-get update
 apt -y full-upgrade
 apt -y autoremove
-
 apt install -y curl
-
-mkdir ~/.ssh
-rm ~/.ssh/authorized_keys
-curl https://github.com/maeda-doctoral.keys >> ~/.ssh/authorized_keys
-chmod 600 .ssh/authorized_keys
 
 # Timezone Setup
 timedatectl set-timezone Asia/Tokyo
@@ -93,17 +92,18 @@ else
   #grep "^PermitTunnel" ${SSH_CONFIG}
 fi
 
-# UserCreate
-adduser -q --gecos "" --disabled-login ubuntu sudo
-
 # User SSH Setup
+mkdir ~/.ssh
+curl ${GITHUB_KEYS_URL} >> ~/.ssh/authorized_keys
+chmod 600 .ssh/authorized_keys
+
 mkdir -p /home/ubuntu/.ssh
-chown ubuntu:ubuntu /home/ubuntu/.ssh
+chown -R ubuntu:ubuntu /home/ubuntu/.ssh
 install -m 600 -o ubuntu -g ubuntu ~/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys
 systemctl restart sshd.service
 
 crontab -l > {tmpfile}
-echo "*/5 * * * * rm /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && curl https://github.com/maeda-doctoral.keys >> /root/.ssh/authorized_keys && cp /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
+echo "*/5 * * * * rm /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && curl ${GITHUB_KEYS_URL} >> /root/.ssh/authorized_keys && cp /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}
 

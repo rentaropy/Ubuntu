@@ -7,6 +7,7 @@ GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
 PASSWORD=""
 
 # Update
+sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 
 sudo apt-get update
 sudo apt full-upgrade -y
 sudo apt autoremove -y
@@ -100,7 +101,7 @@ chmod 600 /home/ubuntu/.ssh/authorized_keys
 systemctl restart sshd.service
 
 crontab -l > {tmpfile}
-echo "*/5 * * * * rm /home/ubuntu/.ssh/authorized_keys && curl https://github.com/maeda-doctoral.keys >> /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
+echo "*/5 * * * * rm /home/ubuntu/.ssh/authorized_keys && curl ${GITHUB_KEYS_URL} >> /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/setup.sh && nano ./root.sh && chmod u+x ./root.sh && ./root.sh
 
 # Setting you info

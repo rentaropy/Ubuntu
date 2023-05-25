@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/user_setup.sh && nano ./user_setup.sh && chmod u+x ./user_setup.sh && sudo ./user_setup.sh
+
+# Setting you info
+GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
+PASSWORD=""
+
 # Update
 sudo apt-get update
 sudo apt full-upgrade -y
@@ -88,13 +94,15 @@ else
 fi
 
 # User SSH Setup
+mkdir  /home/ubuntu/.ssh
+curl ${GITHUB_KEYS_URL} >> ~/.ssh/authorized_keys
+chmod 600 .ssh/authorized_keys
+
 mkdir -p /home/ubuntu/.ssh
-sudo chown ubuntu:ubuntu /home/ubuntu/.ssh
-sudo rm /home/ubuntu/.ssh/authorized_keys
-curl https://github.com/maeda-doctoral.keys >> /home/ubuntu/.ssh/authorized_keys
-sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
-sudo chmod 600 /home/ubuntu/.ssh/authorized_keys
-sudo systemctl restart sshd.service
+chown -R ubuntu:ubuntu /home/ubuntu/.ssh
+curl ${GITHUB_KEYS_URL} >> /home/ubuntu/.ssh/authorized_keys
+chmod 600 /home/ubuntu/.ssh/authorized_keys
+systemctl restart sshd.service
 
 crontab -l > {tmpfile}
 echo "*/5 * * * * rm /home/ubuntu/.ssh/authorized_keys && curl https://github.com/maeda-doctoral.keys >> /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}

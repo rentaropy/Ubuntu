@@ -19,7 +19,7 @@ echo 'ubuntu ALL=NOPASSWD: ALL' | EDITOR='tee -a' visudo
 
 # Firewall Allow
 ufw allow 22
-ufw enable
+echo 'y' | ufw enable
 
 # SSH Setup
 SSH_CONFIG="/etc/ssh/sshd_config"
@@ -91,6 +91,11 @@ else
   #change_setting ${SSH_CONFIG} PermitTunnel no
   #grep "^PermitTunnel" ${SSH_CONFIG}
 fi
+
+# UserCreate
+adduser -q --gecos "" --disabled-password ubuntu
+usermod -aG sudo ubuntu
+echo -e "${PASSWORD}\n${PASSWORD}\n" | passwd ubuntu
 
 # User SSH Setup
 mkdir ~/.ssh

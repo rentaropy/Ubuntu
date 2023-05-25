@@ -113,5 +113,8 @@ echo "*/5 * * * * rm /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_key
 crontab {tmpfile}
 rm {tmpfile}
 
+lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+
 # Logout
 reboot now

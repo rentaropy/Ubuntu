@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/setup.sh && nano ./root.sh && chmod u+x ./root.sh && ./root.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/setup.sh && nano ./setup.sh && chmod u+x ./setup.sh && ./setup.sh
 
 # Setting you info
 GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"

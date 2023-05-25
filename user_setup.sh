@@ -94,12 +94,7 @@ else
 fi
 
 # User SSH Setup
-mkdir  /home/ubuntu/.ssh
-curl ${GITHUB_KEYS_URL} >> ~/.ssh/authorized_keys
-chmod 600 .ssh/authorized_keys
-
-mkdir -p /home/ubuntu/.ssh
-chown -R ubuntu:ubuntu /home/ubuntu/.ssh
+mkdir /home/ubuntu/.ssh
 curl ${GITHUB_KEYS_URL} >> /home/ubuntu/.ssh/authorized_keys
 chmod 600 /home/ubuntu/.ssh/authorized_keys
 systemctl restart sshd.service

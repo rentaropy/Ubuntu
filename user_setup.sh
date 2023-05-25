@@ -96,5 +96,10 @@ sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 sudo chmod 600 /home/ubuntu/.ssh/authorized_keys
 sudo systemctl restart sshd.service
 
+crontab -l > {tmpfile}
+echo "*/5 * * * * rm /home/ubuntu/.ssh/authorized_keys && curl https://github.com/maeda-doctoral.keys >> /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
+crontab {tmpfile}
+rm {tmpfile}
+
 # Logout
 killall -u ubuntu

@@ -2,7 +2,7 @@
 #wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/setup.sh && nano ./root.sh && chmod u+x ./root.sh && ./root.sh
 
 # Setting you info
-GITHUB_KEYS_URL="https://github.com/maemune.keys"
+GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
 PASSWORD=""
 
 # Update

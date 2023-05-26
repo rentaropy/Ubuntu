@@ -1,12 +1,12 @@
 #!/bin/bash
 
+#wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/python_setup.sh && nano ./python_setup.sh && chmod u+x ./python_setup.sh && ./python_setup.sh
+
 sudo apt-get update
 sudo apt install -y software-properties-common
-sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt install -y python3.10
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 0
-sudo apt-get install -y python3.10-dev python3-pip python3.10-distutils
-curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+echo "" | sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt install -y python3.9
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 0
+sudo apt-get install -y python3.9-dev python3-pip python3.9-distutils
+curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
 python -m pip install --upgrade pip
-sudo apt install -y mysql-server mysql-client libmysqlclient-dev libpango-1.0-0 libpangoft2-1.0-0
-python -m pip install -r requirements.txt

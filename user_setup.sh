@@ -96,15 +96,16 @@ fi
 
 # User SSH Setup
 mkdir /home/ubuntu/.ssh
-curl ${GITHUB_KEYS_URL} >> /home/ubuntu/.ssh/authorized_keys
+curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys
 chmod 600 /home/ubuntu/.ssh/authorized_keys
 systemctl restart sshd.service
 
 crontab -l > {tmpfile}
-echo "*/5 * * * * rm /home/ubuntu/.ssh/authorized_keys && curl ${GITHUB_KEYS_URL} >> /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
+echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}
 
+# Storage FullExtend
 sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
 sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
 

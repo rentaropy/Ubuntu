@@ -4,20 +4,20 @@
 
 # Setting you info
 GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
-PASSWORD=""
+#PASSWORD=""
 
 # Update
-sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 
+#sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 
 sudo apt-get update
 sudo apt full-upgrade -y
 sudo apt autoremove -y
-sudo apt install -y curl
+#sudo apt install -y curl
 
 # Timezone Setup
 sudo timedatectl set-timezone Asia/Tokyo
 
 # noPasswd ubuntu
-sudo echo 'ubuntu ALL=NOPASSWD: ALL' | EDITOR='tee -a' visudo
+#sudo echo 'ubuntu ALL=NOPASSWD: ALL' | EDITOR='tee -a' visudo
 
 # Firewall Allow
 sudo ufw allow 22
@@ -110,4 +110,4 @@ sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
 sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
 
 # Logout
-killall -u ubuntu
+sudo reboot now

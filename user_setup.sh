@@ -7,11 +7,11 @@ GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
 #PASSWORD=""
 
 # Update
-#sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 
+sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 
 sudo apt-get update
 sudo apt full-upgrade -y
 sudo apt autoremove -y
-#sudo apt install -y curl
+sudo apt install -y curl
 
 # Timezone Setup
 sudo timedatectl set-timezone Asia/Tokyo

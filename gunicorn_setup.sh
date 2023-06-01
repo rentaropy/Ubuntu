@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/gunicorn_setup.sh && nano ./gunicorn_setup.sh && chmod u+x ./gunicorn_setup.sh && ./gunicorn_setup.sh
+
 cd ~/Django_project/
 mkdir -p gunicorn/log gunicorn/run
 

@@ -40,5 +40,5 @@ sync{
     }
 }" > /etc/lsyncd/lsyncd.conf.lua'
 
-udo systemctl restart lsyncd
+sudo systemctl restart lsyncd
 sudo systemctl enable lsyncd

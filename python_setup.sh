@@ -7,8 +7,10 @@ sudo apt install -y software-properties-common
 echo "" | sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt install -y python3.9
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 0
+
+sudo apt-get install libreadline-dev zlib1g-dev libncursesw5-dev libssl-dev libsqlite3-dev  libgdbm-dev libc6-dev libbz2-dev
+sudo apt-get install build-essential libssl-dev libffi-dev  libexpat1-dev liblzma-dev
+
 sudo apt-get install -y python3.9-dev python3-pip python3.9-distutils
 curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
 python -m pip install --upgrade pip
-sudo apt install -y mysql-client libmysqlclient-dev libpango-1.0-0 libpangoft2-1.0-0
-python -m pip install -r requirements.txt

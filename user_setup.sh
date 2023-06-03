@@ -11,7 +11,7 @@ sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|s
 sudo apt-get update
 sudo apt full-upgrade -y
 sudo apt autoremove -y
-sudo apt install -y curl
+sudo apt install -y curl unzip
 
 # Timezone Setup
 sudo timedatectl set-timezone Asia/Tokyo

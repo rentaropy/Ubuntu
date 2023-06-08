@@ -6,6 +6,9 @@ cd ~/Django_project/
 mkdir -p gunicorn/log gunicorn/run
 
 echo '# -*- coding: utf-8 -*-
+import sys
+sys.dont_write_bytecode = True
+
 import multiprocessing
 from socket import gethostbyname, gethostname
 

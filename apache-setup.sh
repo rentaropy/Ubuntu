@@ -6,7 +6,6 @@ sudo apt-get update
 sudo apt install -y apache2
 sudo ufw allow 'Apache Full'
 sudo systemctl enable apache2
-sudo systemctl status apache2
 
 cd /etc/apache2/mods-available
 sudo a2enmod proxy

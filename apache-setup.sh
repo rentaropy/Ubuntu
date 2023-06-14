@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/apache-setup.sh && nano ./apache-setup.sh && chmod u+x ./apache-setup.sh && ./apache-setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/apache-setup.sh && nano ./apache-setup.sh && chmod u+x ./apache-setup.sh && ./apache-setup.sh
 
 sudo apt-get update
 sudo apt install -y apache2

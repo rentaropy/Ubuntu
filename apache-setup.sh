@@ -2,6 +2,8 @@
 
 #wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/apache-setup.sh && nano ./apache-setup.sh && chmod u+x ./apache-setup.sh && ./apache-setup.sh
 
+IPADDRESS=""
+
 sudo apt-get update
 sudo apt install -y apache2
 sudo ufw allow 'Apache Full'
@@ -24,8 +26,8 @@ sudo cp -p /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-avai
 sudo sh -c "echo '<VirtualHost *:80>
     ServerName localhost
     ProxyPassMatch ^/static !
-    ProxyPass / http://10.131.1.:8000/
-    ProxyPassReverse / http://10.131.1.:8000/
+    ProxyPass / http://${IPADDRESS}:8000/
+    ProxyPassReverse / http://${IPADDRESS}:8000/
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf"
 sudo systemctl restart apache2
 sudo systemctl status apache2

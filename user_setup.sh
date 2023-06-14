@@ -103,7 +103,7 @@ curl https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/update.s
 
 crontab -l > {tmpfile}
 echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys
-* * */2 * * /home/ubuntu/update.sh" >> {tmpfile}
+0 3 */2 * * /home/ubuntu/update.sh" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}
 

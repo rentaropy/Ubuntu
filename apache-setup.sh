@@ -2,7 +2,7 @@
 
 #wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/apache-setup.sh && nano ./apache-setup.sh && chmod u+x ./apache-setup.sh && ./apache-setup.sh
 
-IPADDRESS=""
+IPADDRESS="10.131.0.0"
 
 sudo apt-get update
 sudo apt install -y apache2

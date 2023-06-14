@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/gunicorn_setup.sh && nano ./gunicorn_setup.sh && chmod u+x ./gunicorn_setup.sh && ./gunicorn_setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Gunicorn_Setup.sh && nano ./Gunicorn_Setup.sh && chmod u+x ./Gunicorn_Setup.sh && ./Gunicorn_Setup.sh
 
 cd ~/Child-Guidance/
 mkdir -p gunicorn/log gunicorn/run
@@ -25,7 +25,7 @@ disable_redirect_access_to_syslog = True
 errorlog = "gunicorn/log/error.log"
 loglevel = "info"' > gunicorn/gunicorn.conf.py
 
-python -m pip install gunicorn
+pip install gunicorn
 sudo mkdir -p /usr/lib/systemd/system/
 sudo sh -c "echo '[Unit]
 Description=Python WSGI application
@@ -38,8 +38,7 @@ WorkingDirectory=/home/ubuntu/Child-Guidance
 ExecStart=/home/ubuntu/.local/bin/gunicorn edogawachildabuse.wsgi -c gunicorn/gunicorn.conf.py
 [Install]
 WantedBy=multi-user.target' > /usr/lib/systemd/system/gunicorn.service"
-
 sudo systemctl daemon-reload
 sudo systemctl enable gunicorn
-sudo systemctl start gunicorn
+sudo systemctl restart gunicorn
 sudo systemctl status gunicorn

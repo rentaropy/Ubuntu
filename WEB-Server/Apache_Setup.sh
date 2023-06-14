@@ -1,8 +1,7 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/apache-setup.sh && nano ./apache-setup.sh && chmod u+x ./apache-setup.sh && ./apache-setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Apache_Setup.sh && nano ./Apache_Setup.sh && chmod u+x ./Apache_Setup.sh && ./Apache_Setup.sh
 
-sudo apt-get update
 sudo apt install -y apache2
 sudo ufw allow 'Apache Full'
 sudo systemctl enable apache2
@@ -13,6 +12,7 @@ cd /etc/apache2/mods-available
 sudo a2enmod proxy
 sudo a2enmod proxy_http
 sudo a2enmod proxy_http
+
 cd
 sudo sh -c "echo 'ServerTokens ProductOnly
 ServerSignature Off

@@ -1,26 +1,27 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/setup.sh && nano ./setup.sh && chmod u+x ./setup.sh && ./setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Init_Setup.sh && nano ./Init_Setup.sh && chmod u+x ./Init_Setup.sh && ./Init_Setup.sh
 
 # Setting you info
 GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
-PASSWORD=""
+#PASSWORD=""
 
 # Update
-apt-get update
-apt -y full-upgrade
-apt -y autoremove
-apt install -y curl
+sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 
+sudo apt-get update
+sudo apt -y full-upgrade
+sudo apt -y autoremove
+sudo apt -y install openssh-server curl unzip
 
 # Timezone Setup
-timedatectl set-timezone Asia/Tokyo
+sudo timedatectl set-timezone Asia/Tokyo
 
 # noPasswd ubuntu
-echo 'ubuntu ALL=NOPASSWD: ALL' | EDITOR='tee -a' visudo
+sudo echo 'ubuntu ALL=NOPASSWD: ALL' | EDITOR='tee -a' visudo
 
 # Firewall Allow
-ufw allow 22
-echo 'y' | ufw enable
+sudo ufw allow 22
+echo 'y' | sudo ufw enable
 
 # SSH Setup
 SSH_CONFIG="/etc/ssh/sshd_config"
@@ -46,7 +47,7 @@ function change_setting () {
 if [ -f ${SSH_CONFIG_BACKUP} ]; then
   echo "SSH setting is already done."
 else
-  cp -i ${SSH_CONFIG} ${SSH_CONFIG_BACKUP}
+  sudo cp -i ${SSH_CONFIG} ${SSH_CONFIG_BACKUP}
   
   # Port
   change_setting ${SSH_CONFIG} Port ${SSH_PORT_NUMBER}
@@ -93,28 +94,25 @@ else
   #grep "^PermitTunnel" ${SSH_CONFIG}
 fi
 
-# UserCreate
-adduser -q --gecos "" --disabled-password ubuntu
-usermod -aG sudo ubuntu
-echo -e "${PASSWORD}\n${PASSWORD}\n" | passwd ubuntu
-
 # User SSH Setup
-mkdir ~/.ssh
-curl ${GITHUB_KEYS_URL} >> ~/.ssh/authorized_keys
-chmod 600 .ssh/authorized_keys
-
-mkdir -p /home/ubuntu/.ssh
-chown -R ubuntu:ubuntu /home/ubuntu/.ssh
-install -m 600 -o ubuntu -g ubuntu ~/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys
+mkdir /home/ubuntu/.ssh
+curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys
+chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+chmod 600 /home/ubuntu/.ssh/authorized_keys
 systemctl restart sshd.service
 
+curl https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Update.sh > /home/ubuntu/Update.sh
+chmod u+x ./Update.sh
+
 crontab -l > {tmpfile}
-echo "*/5 * * * * rm /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && curl ${GITHUB_KEYS_URL} >> /root/.ssh/authorized_keys && cp /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys && chown -R ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
+echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys
+0 3 */2 * * /home/ubuntu/Update.sh" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}
 
-lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
-resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+# Storage FullExtend
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
 
 # Logout
-reboot now
+sudo reboot now

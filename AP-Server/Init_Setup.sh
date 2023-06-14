@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/user_setup.sh && nano ./user_setup.sh && chmod u+x ./user_setup.sh && sudo ./user_setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Init_Setup.sh && nano ./Init_Setup.sh && chmod u+x ./Init_Setup.sh && ./Init_Setup.sh
 
 # Setting you info
 GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
@@ -9,15 +9,15 @@ GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
 # Update
 sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 
 sudo apt-get update
-sudo apt full-upgrade -y
-sudo apt autoremove -y
-sudo apt install -y openssh-server curl unzip
+sudo apt -y full-upgrade
+sudo apt -y autoremove
+sudo apt -y install openssh-server curl unzip
 
 # Timezone Setup
 sudo timedatectl set-timezone Asia/Tokyo
 
 # noPasswd ubuntu
-#sudo echo 'ubuntu ALL=NOPASSWD: ALL' | EDITOR='tee -a' visudo
+sudo echo 'ubuntu ALL=NOPASSWD: ALL' | EDITOR='tee -a' visudo
 
 # Firewall Allow
 sudo ufw allow 22
@@ -97,13 +97,16 @@ fi
 # User SSH Setup
 mkdir /home/ubuntu/.ssh
 curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys
+chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 chmod 600 /home/ubuntu/.ssh/authorized_keys
 systemctl restart sshd.service
-curl https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/update.sh > /home/ubuntu/update.sh && chmod u+x ./update.sh
+
+curl https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Update.sh > /home/ubuntu/Update.sh
+chmod u+x ./Update.sh
 
 crontab -l > {tmpfile}
-echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys
-0 3 */2 * * /home/ubuntu/update.sh" >> {tmpfile}
+echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys
+0 3 */2 * * /home/ubuntu/Update.sh" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}
 

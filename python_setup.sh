@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/python_setup.sh && nano ./python_setup.sh && chmod u+x ./python_setup.sh && ./python_setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/python_setup.sh && nano ./python_setup.sh && chmod u+x ./python_setup.sh && ./python_setup.sh
 
 sudo apt-get update
 sudo apt install -y software-properties-common

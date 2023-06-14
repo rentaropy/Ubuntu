@@ -11,7 +11,7 @@ sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|s
 sudo apt-get update
 sudo apt full-upgrade -y
 sudo apt autoremove -y
-sudo apt install -y curl unzip
+sudo apt install -y openssh-server curl unzip
 
 # Timezone Setup
 sudo timedatectl set-timezone Asia/Tokyo
@@ -99,10 +99,11 @@ mkdir /home/ubuntu/.ssh
 curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys
 chmod 600 /home/ubuntu/.ssh/authorized_keys
 systemctl restart sshd.service
-curl https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/update.sh && nano ./update.sh && chmod u+x ./update.sh
+curl https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/update.sh > /home/ubuntu/update.sh && chmod u+x ./update.sh
 
 crontab -l > {tmpfile}
-echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys" >> {tmpfile}
+echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys
+* * */2 * * /home/ubuntu/update.sh" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}
 

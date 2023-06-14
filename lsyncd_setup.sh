@@ -19,18 +19,6 @@ sync{
     default.rsync,
     delay = 0,
     source = "/home/ubuntu/",
-    target = "ubuntu@10.131.1.201:/home/ubuntu/AP",
-    delete = "running",
-    init = false,
-    rsync = {
-        archive = true,
-        rsh = "/usr/bin/ssh -i /home/ubuntu/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
-    }
-}
-sync{
-    default.rsync,
-    delay = 0,
-    source = "/home/ubuntu/",
     target = "ubuntu@10.131.1.101:/home/ubuntu",
     delete = "running",
     init = false,

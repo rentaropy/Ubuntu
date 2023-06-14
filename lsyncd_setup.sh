@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/lsyncd_setup.sh && nano ./lsyncd_setup.sh && chmod u+x ./lsyncd_setup.sh && ./lsyncd_setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/lsyncd_setup.sh && nano ./lsyncd_setup.sh && chmod u+x ./lsyncd_setup.sh && ./lsyncd_setup.sh
 
 sudo apt install lsyncd -y
 sudo mkdir /var/log/lsyncd

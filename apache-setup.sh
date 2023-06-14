@@ -2,12 +2,12 @@
 
 #wget https://raw.githubusercontent.com/maeda-doctoral/ubuntu_setup/main/apache-setup.sh && nano ./apache-setup.sh && chmod u+x ./apache-setup.sh && ./apache-setup.sh
 
-IPADDRESS="10.131.0.0"
-
 sudo apt-get update
 sudo apt install -y apache2
 sudo ufw allow 'Apache Full'
 sudo systemctl enable apache2
+
+IPADDRESS=$(hostname -I | awk '{print $1}')
 
 cd /etc/apache2/mods-available
 sudo a2enmod proxy

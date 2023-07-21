@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Apache_Setup.sh && nano ./Apache_Setup.sh && chmod u+x ./Apache_Setup.sh && ./Apache_Setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/WEB-Server/Apache_Setup.sh && nano ./Apache_Setup.sh && chmod u+x ./Apache_Setup.sh && ./Apache_Setup.sh
 
 sudo apt install -y apache2
 sudo ufw allow 'Apache Full'

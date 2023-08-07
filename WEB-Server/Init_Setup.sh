@@ -17,7 +17,7 @@ sudo apt -y install openssh-server curl unzip
 sudo timedatectl set-timezone Asia/Tokyo
 
 # noPasswd ubuntu
-sudo echo 'ubuntu ALL=NOPASSWD: ALL' | EDITOR='tee -a' visudo
+sudo echo 'ubuntu ALL=NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
 # Firewall Allow
 sudo ufw allow 22

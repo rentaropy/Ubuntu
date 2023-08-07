@@ -4,7 +4,7 @@
 
 # Setting you info
 GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
-#PASSWORD=""
+PASSWORD=""
 
 # Update
 sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 

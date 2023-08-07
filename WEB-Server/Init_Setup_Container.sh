@@ -102,7 +102,8 @@ echo -e "${PASSWORD}\n${PASSWORD}\n" | passwd ubuntu
 # User SSH Setup
 mkdir /home/ubuntu/.ssh
 curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys
-chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+chmod 755 /home/ubuntu/.ssh
+chown -R ubuntu:ubuntu /home/ubuntu/
 chmod 600 /home/ubuntu/.ssh/authorized_keys
 systemctl restart sshd.service
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Init_Setup_Container.sh && nano ./Init_Setup_Container.sh && chmod u+x ./Init_Setup_Container.sh && ./Init_Setup_Container.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/WEB-Server/Init_Setup_Container.sh && nano ./Init_Setup_Container.sh && chmod u+x ./Init_Setup_Container.sh && ./Init_Setup_Container.sh
 
 # Setting you info
 GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"

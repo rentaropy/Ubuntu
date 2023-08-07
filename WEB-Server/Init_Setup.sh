@@ -95,7 +95,6 @@ else
 fi
 
 # User SSH Setup
-mkdir /home/ubuntu/.ssh
 curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys
 chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 chmod 600 /home/ubuntu/.ssh/authorized_keys

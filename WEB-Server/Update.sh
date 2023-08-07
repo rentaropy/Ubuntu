@@ -4,7 +4,6 @@
 
 # Setting you info
 #PASSWORD=""
-PASSWORD=${PASSWORD}
 # Update
 echo ${PASSWORD} | sudo apt-get update
 sudo apt -y full-upgrade

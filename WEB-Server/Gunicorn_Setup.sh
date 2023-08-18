@@ -25,7 +25,7 @@ disable_redirect_access_to_syslog = True
 errorlog = "gunicorn/log/error.log"
 loglevel = "info"' > gunicorn/gunicorn.conf.py
 
-pip install gunicorn
+python -m pip install gunicorn
 sudo mkdir -p /usr/lib/systemd/system/
 sudo sh -c "echo '[Unit]
 Description=Python WSGI application

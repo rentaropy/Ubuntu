@@ -19,13 +19,13 @@ server {
 
     location / {
         proxy_pass http://edogawa;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
     location /static {
        autoindex on;
-       alias ~/Child-Guidance/accounts/static/;
+       alias /home/ubuntu/Child-Guidance/accounts/static/;
 
     }
 

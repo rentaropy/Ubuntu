@@ -9,7 +9,7 @@ sudo systemctl enable nginx
 IPADDRESS=$(hostname -I | awk '{print $1}')
 
 sudo sh -c "echo 'upstream edogawa {
-    server 127.0.1.1:8000;
+    server ${IPADDRESS}:8000;
     # You can add more servers here if you want to load balance across multiple instances.
 }
 

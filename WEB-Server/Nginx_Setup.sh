@@ -43,6 +43,6 @@ server {
     }
 
 }' > /etc/nginx/sites-available/edogawa"
-
+sudo ln -s /etc/nginx/sites-available/edokawa /etc/nginx/sites-enabled/edokawa
 sudo systemctl restart nginx
 sudo systemctl status nginx

@@ -1,6 +1,6 @@
 #!/bin/bash
 #Create by EBP-Japan
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/WEB-Server/Update.sh && nano ./Update.sh && chmod u+x ./Update.sh && ./Update.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Update.sh && nano ./Update.sh && chmod u+x ./Update.sh && ./Update.sh
 
 # Setting you info
 #PASSWORD=""

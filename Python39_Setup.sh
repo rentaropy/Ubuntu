@@ -1,5 +1,5 @@
 #!/bin/bash
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/WEB-Server/Python39_Setup.sh && nano ./Python39_Setup.sh && chmod u+x ./Python39_Setup.sh && ./Python39_Setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Python39_Setup.sh && nano ./Python39_Setup.sh && chmod u+x ./Python39_Setup.sh && ./Python39_Setup.sh
 
 sudo apt install -y software-properties-common
 echo "" | sudo add-apt-repository ppa:deadsnakes/ppa

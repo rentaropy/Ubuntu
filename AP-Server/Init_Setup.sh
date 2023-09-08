@@ -20,7 +20,7 @@ sudo timedatectl set-timezone Asia/Tokyo
 echo 'ubuntu ALL=NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
 # Firewall Allow
-sudo ufw allow 22
+sudo ufw allow 'OpenSSH'
 echo 'y' | sudo ufw enable
 
 # SSH Setup
@@ -105,7 +105,7 @@ curl https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/AP-Server/Upda
 
 crontab -l > {tmpfile}
 echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys
-0 3 */2 * * /home/ubuntu/Update.sh" >> {tmpfile}
+0 4 * * * /home/ubuntu/Update.sh" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}
 

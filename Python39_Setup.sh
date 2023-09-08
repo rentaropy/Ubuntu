@@ -1,7 +1,7 @@
 #!/bin/bash
 #wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Python39_Setup.sh && nano ./Python39_Setup.sh && chmod u+x ./Python39_Setup.sh && ./Python39_Setup.sh
 
-sudo apt install -y software-properties-common
+sudo apt install software-properties-common
 echo "" | sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt install -y python3.9
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 0

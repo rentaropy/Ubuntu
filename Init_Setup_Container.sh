@@ -9,8 +9,6 @@ PASSWORD=""
 # Update
 perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 
 apt-get update
-apt -y full-upgrade
-apt -y autoremove
 apt -y install openssh-server curl unzip
 
 # Timezone Setup

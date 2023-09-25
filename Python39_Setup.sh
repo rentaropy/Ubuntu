@@ -11,4 +11,7 @@ sudo apt-get install -y build-essential libssl-dev libffi-dev  libexpat1-dev lib
 
 sudo apt-get install -y python3.9-dev python3-pip python3.9-distutils
 curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
+
+mv ~/.local/bin/pip ~/.local/bin/pip_ && mv ~/.local/bin/pip3.9 ~/.local/bin/pip
+
 pip install --upgrade pip

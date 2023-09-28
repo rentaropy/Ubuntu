@@ -15,4 +15,6 @@ sudo apt-get install -y python3.9-dev python3-pip python3.9-distutils
 curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
 pip install --upgrade pip
 
-echo "Python 3.9 installation complete"
+mv ~/.local/bin/pip ~/.local/bin/pip_ && mv ~/.local/bin/pip3.9 ~/.local/bin/pip
+echo 'export PATH=$PATH:~/.local/bin' >> ~/.profile && source ~/.profile
+exit

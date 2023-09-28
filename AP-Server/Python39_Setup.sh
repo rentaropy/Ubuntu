@@ -17,4 +17,4 @@ pip install --upgrade pip
 
 mv ~/.local/bin/pip ~/.local/bin/pip_ && mv ~/.local/bin/pip3.9 ~/.local/bin/pip
 echo 'export PATH=$PATH:~/.local/bin' >> ~/.profile && source ~/.profile
-sudo reboot now
+exit

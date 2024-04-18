@@ -18,7 +18,7 @@ sudo timedatectl set-timezone Asia/Tokyo
 echo 'ubuntu ALL=NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
 # Firewall Allow
-sudo ufw allow 22
+sudo ufw allow 'OpenSSH'
 echo 'y' | sudo ufw enable
 
 # SSH Setup

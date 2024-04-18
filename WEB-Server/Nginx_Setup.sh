@@ -16,30 +16,23 @@ sudo sh -c "echo 'upstream edogawa {
 server {
     listen 80;
     server_name ${IPADDRESS};
-
+    client_max_body_size 10M;
     location / {
         proxy_pass http://edogawa;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+
+        # Add timeout settings here
+        proxy_connect_timeout 1000s;  # Adjust the timeout value as needed
+        proxy_send_timeout 1000s;    # Adjust the timeout value as needed
+        proxy_read_timeout 1000s;    # Adjust the timeout value as needed
+
     }
+
     location /static {
-       autoindex on;
-       alias /home/ubuntu/Child-Guidance/accounts/static/;
-
-    }
-
-    error_page 400 401 403 404 /404.html;
-    error_page 500 502 503 504 /500.html;
-
-    location = /404.html {
-        internal;
-        root /var/www/html;
-    }
-
-    location = /500.html {
-        internal;
-        root /var/www/html;
+        autoindex on;
+        alias /home/ubuntu/Child-Guidance/accounts/static/;
     }
 
 }' > /etc/nginx/sites-available/edogawa"

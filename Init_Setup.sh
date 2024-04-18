@@ -9,7 +9,7 @@ GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
 # Update
 sudo perl -p -i.bak -e 's%(deb(?:-src|)\s+)https?://(?!archive\.canonical\.com|security\.ubuntu\.com)[^\s]+%$1http://ftp.riken.jp/Linux/ubuntu/%' /etc/apt/sources.list 
 sudo apt-get update
-sudo apt -y install openssh-server curl unzip
+sudo apt -y install openssh-server curl unzip qemu-guest-agent
 
 # Timezone Setup
 sudo timedatectl set-timezone Asia/Tokyo

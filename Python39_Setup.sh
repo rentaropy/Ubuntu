@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget -v4 https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Python39_Setup.sh && nano ./Python39_Setup.sh && chmod u+x ./Python39_Setup.sh && ./Python39_Setup.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Python39_Setup.sh && nano ./Python39_Setup.sh && chmod u+x ./Python39_Setup.sh && ./Python39_Setup.sh
 
 sudo apt install -y software-properties-common
 echo "" | sudo add-apt-repository ppa:deadsnakes/ppa
@@ -11,7 +11,7 @@ sudo apt-get install -y libreadline-dev zlib1g-dev libncursesw5-dev libssl-dev l
 sudo apt-get install -y build-essential libssl-dev libffi-dev  libexpat1-dev liblzma-dev python3-testresources
 
 sudo apt-get install -y python3.9-dev python3-pip python3.9-distutils
-curl -v4 -sS https://bootstrap.pypa.io/get-pip.py | python3.9
+curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
 pip install --upgrade pip
 
 mv ~/.local/bin/pip ~/.local/bin/pip_ && mv ~/.local/bin/pip3.9 ~/.local/bin/pip

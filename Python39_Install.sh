@@ -17,6 +17,7 @@ sudo apt install -y python3.9 python3.9-dev python3.9-distutils
 # 必要な開発ツールのインストール
 sudo apt-get install -y libreadline-dev zlib1g-dev libncursesw5-dev libssl-dev libsqlite3-dev libgdbm-dev libc6-dev libbz2-dev
 sudo apt-get install -y build-essential libffi-dev libexpat1-dev liblzma-dev python3-testresources
+sudo apt-get install -y mysql-client libmysqlclient-dev libpango-1.0-0 libpangoft2-1.0-0
 
 # pipのインストール
 curl -sS https://bootstrap.pypa.io/get-pip.py -o get-pip.py

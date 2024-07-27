@@ -1,5 +1,5 @@
 #!/bin/bash
-#wget https://raw.githubusercontent.com/maemune/Unix/main/Python_Install.sh && nano ./Python_Install.sh && chmod u+x ./Python_Install.sh && ./Python_Install.sh
+#wget https://raw.githubusercontent.com/maemune/Unix/main/Python39_Install.sh && nano ./Python39_Install.sh && chmod u+x ./PPython39_Install.sh && ./Python39_Install.sh
 
 # エラーハンドリングを有効化
 set -e

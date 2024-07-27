@@ -1,5 +1,5 @@
 #!/bin/bash
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Python39_Install.sh && nano ./Python39_Install.sh && chmod u+x ./PPython39_Install.sh && ./Python39_Install.sh
+#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Python39_Install.sh && nano ./Python39_Install.sh && chmod u+x ./Python39_Install.sh && ./Python39_Install.sh
 
 # エラーハンドリングを有効化
 set -e

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/WEB-Server/Gunicorn_Setup.sh && nano ./Gunicorn_Setup.sh && chmod u+x ./Gunicorn_Setup.sh && ./Gunicorn_Setup.sh
+#wget https://raw.githubusercontent.com/rentaropy/Ubuntu/main/WEB-Server/Gunicorn_Setup.sh && nano ./Gunicorn_Setup.sh && chmod u+x ./Gunicorn_Setup.sh && ./Gunicorn_Setup.sh
 
 cd ~/Child-Guidance/
 mkdir -p gunicorn/log gunicorn/run

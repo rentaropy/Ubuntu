@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Init_Setup.sh && nano ./Init_Setup.sh && chmod u+x ./Init_Setup.sh && ./Init_Setup.sh
+#wget https://raw.githubusercontent.com/rentaropy/Ubuntu/main/Init_Setup.sh && nano ./Init_Setup.sh && chmod u+x ./Init_Setup.sh && ./Init_Setup.sh
 
 # Setting you info
 GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
@@ -99,7 +99,7 @@ chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 chmod 600 /home/ubuntu/.ssh/authorized_keys
 sudo systemctl restart sshd.service
 
-curl https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/Update.sh > /home/ubuntu/Update.sh && nano ./Update.sh && chmod u+x ./Update.sh
+curl https://raw.githubusercontent.com/rentaropy/Ubuntu/main/Update.sh > /home/ubuntu/Update.sh && nano ./Update.sh && chmod u+x ./Update.sh
 
 crontab -l > {tmpfile}
 echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys

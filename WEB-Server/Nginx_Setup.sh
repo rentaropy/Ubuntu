@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#wget https://raw.githubusercontent.com/maeda-doctoral/Ubuntu/main/WEB-Server/Nginx_Setup.sh && nano ./Nginx_Setup.sh && chmod u+x ./Nginx_Setup.sh && ./Nginx_Setup.sh
+#wget https://raw.githubusercontent.com/rentaropy/Ubuntu/main/WEB-Server/Nginx_Setup.sh && nano ./Nginx_Setup.sh && chmod u+x ./Nginx_Setup.sh && ./Nginx_Setup.sh
 
 sudo apt -y install nginx
 sudo ufw allow 'Nginx Full'

@@ -3,7 +3,8 @@
 #wget https://raw.githubusercontent.com/rentaropy/Ubuntu/main/Init_Setup.sh && nano ./Init_Setup.sh && chmod u+x ./Init_Setup.sh && ./Init_Setup.sh
 
 # Setting you info
-GITHUB_KEYS_URL="https://github.com/maeda-doctoral.keys"
+GITHUB_KEYS_URL_1="https://github.com/maeda-doctoral.keys"
+GITHUB_KEYS_URL_2="https://github.com/rentaropy.keys"
 #PASSWORD=""
 
 # Update
@@ -94,7 +95,7 @@ fi
 
 # User SSH Setup
 mkdir /home/ubuntu/.ssh
-curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys
+(curl -s ${GITHUB_KEYS_URL_1} ; curl -s ${GITHUB_KEYS_URL_2}) > /home/ubuntu/.ssh/authorized_keys
 chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 chmod 600 /home/ubuntu/.ssh/authorized_keys
 sudo systemctl restart sshd.service
@@ -102,7 +103,7 @@ sudo systemctl restart sshd.service
 curl https://raw.githubusercontent.com/rentaropy/Ubuntu/main/Update.sh > /home/ubuntu/Update.sh && nano ./Update.sh && chmod u+x ./Update.sh
 
 crontab -l > {tmpfile}
-echo "*/5 * * * * curl ${GITHUB_KEYS_URL} > /home/ubuntu/.ssh/authorized_keys && chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys
+echo "*/5 * * * * (curl -s ${GITHUB_KEYS_URL_1} ; curl -s ${GITHUB_KEYS_URL_2}) > /home/ubuntu/.ssh/authorized_keys && chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys && chmod 600 /home/ubuntu/.ssh/authorized_keys
 0 3 */2 * * /home/ubuntu/Update.sh" >> {tmpfile}
 crontab {tmpfile}
 rm {tmpfile}

@@ -5,9 +5,7 @@
 
 # 0. Check for Administrator privileges
 #    If not running as Administrator, relaunch with elevation
-$isAdmin = ([Security.Principal.WindowsPrincipal]
-    [Security.Principal.WindowsIdentity]::GetCurrent()
-).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if (-not $isAdmin) {
     Write-Host "Not running as Administrator. Elevating via cmd.exe..."
@@ -85,5 +83,6 @@ Start-Process `
     -Wait
 
 Write-Host "wslgit installation completed successfully."
+
 
 

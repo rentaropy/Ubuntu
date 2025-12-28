@@ -5,26 +5,32 @@
 
 # 0. Check for Administrator privileges
 #    If not running as Administrator, relaunch with elevation
-$IsAdmin = ([Security.Principal.WindowsPrincipal] `
+$isAdmin = ([Security.Principal.WindowsPrincipal]
     [Security.Principal.WindowsIdentity]::GetCurrent()
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
-if (-not $IsAdmin) {
-    Write-Host "Relaunching as Administrator..."
+if (-not $isAdmin) {
+    Write-Host "Not running as Administrator. Elevating via cmd.exe..."
 
-    if ($PSCommandPath) {
-        # Normal execution (from file)
-        Start-Process powershell `
-          -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" `
-          -Verb RunAs
-    } else {
-        # Executed via irm | iex
-        Start-Process powershell `
-          -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/rentaropy/Ubuntu/refs/heads/main/install-wslgit.ps1 | iex`"" `
-          -Verb RunAs
-    }
+    $tmp = Join-Path $env:TEMP ("elevate_" + [guid]::NewGuid() + ".cmd")
+
+    @"
+@echo off
+powershell -NoProfile -ExecutionPolicy Bypass -Command `
+  `"irm https://raw.githubusercontent.com/rentaropy/Ubuntu/refs/heads/main/install-wslgit.ps1 | iex`"
+"@ | Set-Content -Encoding ASCII $tmp
+
+    Start-Process cmd.exe `
+        -ArgumentList "/c `"$tmp`"" `
+        -Verb RunAs `
+        -Wait
+
+    Remove-Item $tmp -Force
     exit
 }
+
+# ---- elevated execution continues here ----
+Write-Host "Running with Administrator privileges"
 
 # Variables
 $HomePath   = $env:HOMEPATH
@@ -79,4 +85,5 @@ Start-Process `
     -Wait
 
 Write-Host "wslgit installation completed successfully."
+
 

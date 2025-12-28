@@ -10,10 +10,19 @@ $IsAdmin = ([Security.Principal.WindowsPrincipal] `
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if (-not $IsAdmin) {
-    Write-Host "Not running as Administrator. Relaunching with elevated privileges..."
-    Start-Process powershell `
-        -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" `
-        -Verb RunAs
+    Write-Host "Relaunching as Administrator..."
+
+    if ($PSCommandPath) {
+        # Normal execution (from file)
+        Start-Process powershell `
+          -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" `
+          -Verb RunAs
+    } else {
+        # Executed via irm | iex
+        Start-Process powershell `
+          -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/rentaropy/Ubuntu/refs/heads/main/install-wslgit.ps1 | iex`"" `
+          -Verb RunAs
+    }
     exit
 }
 
@@ -70,3 +79,4 @@ Start-Process `
     -Wait
 
 Write-Host "wslgit installation completed successfully."
+

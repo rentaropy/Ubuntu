@@ -1,88 +1,143 @@
 # ======================================
 # wslgit Automated Installation Script
-# (Extract directly to %HOMEPATH%)
+# (Improved with proper elevation handling)
 # ======================================
 
-# 0. Check for Administrator privileges
-#    If not running as Administrator, relaunch with elevation
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+& {
+    $psv = (Get-Host).Version.Major
+    
+    # Language Mode check
+    if ($ExecutionContext.SessionState.LanguageMode.value__ -ne 0) {
+        Write-Host "PowerShell is not running in Full Language Mode." -ForegroundColor Red
+        return
+    }
 
-if (-not $isAdmin) {
-    Write-Host "Not running as Administrator. Elevating via cmd.exe..."
+    # .NET check
+    try {
+        [void][System.AppDomain]::CurrentDomain.GetAssemblies()
+        [void][System.Math]::Sqrt(144)
+    }
+    catch {
+        Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "PowerShell failed to load .NET command." -ForegroundColor Red
+        return
+    }
 
-    $tmp = Join-Path $env:TEMP ("elevate_" + [guid]::NewGuid() + ".cmd")
+    # Check if running as Administrator
+    $isAdmin = [bool]([Security.Principal.WindowsIdentity]::GetCurrent().Groups -match 'S-1-5-32-544')
+    
+    if (-not $isAdmin) {
+        Write-Host "Not running as Administrator. Elevating..." -ForegroundColor Yellow
+        
+        # Generate unique identifier
+        $rand = [Guid]::NewGuid().Guid
+        
+        # Save current script to temp file
+        $ScriptContent = @'
+# ---- Elevated execution ----
+Write-Host "Running with Administrator privileges" -ForegroundColor Green
 
-    @"
-@echo off
-powershell -NoProfile -ExecutionPolicy Bypass -Command `
-  `"irm https://raw.githubusercontent.com/rentaropy/Ubuntu/refs/heads/main/install-wslgit.ps1 | iex`"
-"@ | Set-Content -Encoding ASCII $tmp
-
-    Start-Process cmd.exe `
-        -ArgumentList "/c `"$tmp`"" `
-        -Verb RunAs `
-        -Wait
-
-    Remove-Item $tmp -Force
-    exit
-}
-
-# ---- elevated execution continues here ----
-Write-Host "Running with Administrator privileges"
-
-# Variables
 $HomePath   = $env:HOMEPATH
 $ZipPath    = Join-Path $HomePath "wslgit.zip"
 $WslgitDir  = Join-Path $HomePath "wslgit"
 
-# 1. Retrieve the latest wslgit release information
-Write-Host "Fetching latest wslgit release information..."
+try {
+    # 1. Fetch latest release
+    Write-Host "Fetching latest wslgit release..."
+    $Release = Invoke-RestMethod `
+        -Uri "https://api.github.com/repos/andy-5/wslgit/releases/latest" `
+        -Headers @{ "User-Agent" = "PowerShell" }
+    
+    $Asset = $Release.assets | Where-Object { $_.name -eq "wslgit.zip" }
+    if (-not $Asset) {
+        throw "wslgit.zip asset not found in the latest release."
+    }
 
-$Release = Invoke-RestMethod `
-    -Uri "https://api.github.com/repos/andy-5/wslgit/releases/latest" `
-    -Headers @{ "User-Agent" = "PowerShell" }
+    # 2. Download
+    Write-Host "Downloading wslgit.zip..."
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Invoke-WebRequest -Uri $Asset.browser_download_url -OutFile $ZipPath
 
-$Asset = $Release.assets | Where-Object { $_.name -eq "wslgit.zip" }
+    # 3. Extract
+    Write-Host "Extracting to $HomePath..."
+    if (Test-Path $WslgitDir) {
+        Write-Host "Removing existing wslgit directory..."
+        Remove-Item $WslgitDir -Recurse -Force
+    }
+    Expand-Archive -Path $ZipPath -DestinationPath $HomePath -Force
 
-if (-not $Asset) {
-    Write-Error "wslgit.zip asset not found in the latest release."
-    exit 1
+    # 4. Cleanup ZIP
+    Write-Host "Cleaning up..."
+    Remove-Item $ZipPath -Force
+
+    # 5. Run install.bat
+    $InstallBat = Join-Path $WslgitDir "install.bat"
+    if (-not (Test-Path $InstallBat)) {
+        throw "install.bat not found at: $InstallBat"
+    }
+
+    Write-Host "Running install.bat..."
+    $process = Start-Process `
+        -FilePath "cmd.exe" `
+        -ArgumentList "/c `"$InstallBat`"" `
+        -WorkingDirectory $WslgitDir `
+        -Wait `
+        -PassThru `
+        -NoNewWindow
+
+    if ($process.ExitCode -eq 0) {
+        Write-Host "Installation completed successfully!" -ForegroundColor Green
+    } else {
+        Write-Host "install.bat exited with code: $($process.ExitCode)" -ForegroundColor Yellow
+    }
+}
+catch {
+    Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "Installation failed." -ForegroundColor Red
 }
 
-# Download wslgit.zip
-Write-Host "Downloading wslgit.zip..."
-Invoke-WebRequest -Uri $Asset.browser_download_url -OutFile $ZipPath
+Write-Host "`nPress any key to exit..."
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+'@
+        
+        # Save to temp file
+        $TempScript = Join-Path $env:TEMP "wslgit_install_$rand.ps1"
+        Set-Content -Path $TempScript -Value $ScriptContent -Encoding UTF8
+        
+        if (-not (Test-Path $TempScript)) {
+            Write-Host "Failed to create temporary script file!" -ForegroundColor Red
+            return
+        }
 
-# 2. Extract ZIP directly into %HOMEPATH%
-Write-Host "Extracting wslgit.zip directly into %HOMEPATH%..."
+        # Execute with elevation via cmd.exe (MAS style)
+        $env:ComSpec = "$env:SystemRoot\system32\cmd.exe"
+        
+        if ($psv -lt 3) {
+            # PowerShell v2 compatibility
+            $p = Start-Process -FilePath $env:ComSpec `
+                -ArgumentList "/c powershell -NoProfile -ExecutionPolicy Bypass -File `"$TempScript`"" `
+                -Verb RunAs `
+                -PassThru
+            $p.WaitForExit()
+        }
+        else {
+            # PowerShell v3+
+            Start-Process -FilePath $env:ComSpec `
+                -ArgumentList "/c powershell -NoProfile -ExecutionPolicy Bypass -File `"$TempScript`"" `
+                -Wait `
+                -Verb RunAs
+        }
+        
+        # Cleanup temp file
+        Start-Sleep -Seconds 2
+        if (Test-Path $TempScript) {
+            Remove-Item $TempScript -Force -ErrorAction SilentlyContinue
+        }
+        
+        return
+    }
 
-if (Test-Path $WslgitDir) {
-    Write-Host "Existing wslgit directory found. Removing..."
-    Remove-Item $WslgitDir -Recurse -Force
+    # If already admin, execute directly (shouldn't happen with irm|iex but kept for safety)
+    Write-Host "Already running as Administrator" -ForegroundColor Green
+    Write-Host "Please run this script without admin privileges for proper elevation handling." -ForegroundColor Yellow
 }
-
-Expand-Archive -Path $ZipPath -DestinationPath $HomePath -Force
-
-# 3. Remove the ZIP file
-Write-Host "Removing ZIP file..."
-Remove-Item $ZipPath -Force
-
-# 4. Run install.bat with Administrator privileges
-$InstallBat = Join-Path $WslgitDir "install.bat"
-
-if (-not (Test-Path $InstallBat)) {
-    Write-Error "install.bat not found at expected path: $InstallBat"
-    exit 1
-}
-
-Write-Host "Running install.bat with Administrator privileges..."
-Start-Process `
-    -FilePath $InstallBat `
-    -WorkingDirectory $WslgitDir `
-    -Verb RunAs `
-    -Wait
-
-Write-Host "wslgit installation completed successfully."
-
-
-

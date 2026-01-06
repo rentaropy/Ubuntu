@@ -33,16 +33,16 @@ cd "$WORKSPACE_DIR"
 if [ ! -f "pixi.toml" ]; then
     echo "--- Initializing Pixi Project ---"
     pixi init .
-    
-    # Install Spyder only if you are using the Spyder environment.
-    if [[ "$ENVIRONMENT" == "spyder" || "$ENVIRONMENT" == "spyder-gpu" ]]; then
-        echo "--- Installing Spyder via Pixi ---"
-        pixi add spyder
-    fi
-else
-    echo "--- Syncing Pixi Environment ---"
-    pixi install
 fi
+
+# Install Spyder only if you are using the Spyder environment.
+if [[ "$ENVIRONMENT" == "spyder" || "$ENVIRONMENT" == "spyder-gpu" ]]; then
+    echo "--- Ensuring Spyder is installed via Pixi ---"
+    pixi add spyder
+fi
+
+echo "--- Syncing Pixi Environment ---"
+pixi install
 
 # For Minimal environments, exit here (execute sleep infinity)
 if [[ "$ENVIRONMENT" == "minimal" || "$ENVIRONMENT" == "minimal-gpu" ]]; then

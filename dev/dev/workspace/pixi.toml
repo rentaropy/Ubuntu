@@ -7,5 +7,3 @@ version = "0.1.0"
 [tasks]
 
 [dependencies]
-spyder = ">=6.1.2,<7"
-python = "3.14.*"

@@ -2,7 +2,7 @@
 
 set -e
 
-# Spyder環境の場合のみ、GUI関連の設定を実行
+# Only in the Spyder environment, execute GUI-related settings.
 if [[ "$ENVIRONMENT" == "spyder" || "$ENVIRONMENT" == "spyder-gpu" ]]; then
     export XDG_RUNTIME_DIR=/tmp/runtime-ubuntu
     if [ ! -d "$XDG_RUNTIME_DIR" ]; then
@@ -34,7 +34,7 @@ if [ ! -f "pixi.toml" ]; then
     echo "--- Initializing Pixi Project ---"
     pixi init .
     
-    # Spyder環境の場合のみSpyderをインストール
+    # Install Spyder only if you are using the Spyder environment.
     if [[ "$ENVIRONMENT" == "spyder" || "$ENVIRONMENT" == "spyder-gpu" ]]; then
         echo "--- Installing Spyder via Pixi ---"
         pixi add spyder
@@ -44,13 +44,13 @@ else
     pixi install
 fi
 
-# Minimal環境の場合はここで終了（sleep infinityを実行）
+# For Minimal environments, exit here (execute sleep infinity)
 if [[ "$ENVIRONMENT" == "minimal" || "$ENVIRONMENT" == "minimal-gpu" ]]; then
     echo "Setup complete. Container is ready for VSCode connection."
     exec sleep infinity
 fi
 
-# Spyder環境の場合はSpyderを起動
+# If using the Spyder environment, launch Spyder.
 echo "Linking Fcitx 5 Qt plugin to Pixi environment..."
 SOURCE_LIB=$(dpkg -L fcitx5-frontend-qt5 | grep "libfcitx5platforminputcontextplugin.so" | head -n 1)
 TARGET_DIR=$(find .pixi -type d -path "*/plugins/platforminputcontexts" 2>/dev/null | head -n 1)

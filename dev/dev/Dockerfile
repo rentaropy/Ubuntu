@@ -1,10 +1,10 @@
 ARG ENVIRONMENT=spyder-gpu
 
-# ENVIRONMENTから条件を判定
+# Determine conditions from ENVIRONMENT
 FROM nvidia/cuda:12.9.1-cudnn-devel-ubuntu24.04 AS base-gpu
 FROM ubuntu:24.04 AS base-cpu
 
-# minimal-gpu または spyder-gpu の場合はGPUイメージを使用
+# minimal-gpu or spyder-gpu uses a GPU image
 FROM base-gpu AS final-minimal-gpu
 FROM base-gpu AS final-spyder-gpu
 FROM base-cpu AS final-minimal
@@ -14,7 +14,7 @@ FROM final-${ENVIRONMENT} AS selected
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 共通パッケージのインストール
+# Installing Common Packages
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
     nano \
     && rm -rf /var/lib/apt/lists/*
 
-# Spyder用パッケージのインストール（spyder または spyder-gpuの場合のみ）
+# Installing the Spyder Package (Only for spyder or spyder-gpu)
 ARG ENVIRONMENT
 RUN case "$ENVIRONMENT" in \
     spyder|spyder-gpu) \
@@ -60,35 +60,35 @@ RUN case "$ENVIRONMENT" in \
         && rm -rf /var/lib/apt/lists/* ;; \
     esac
 
-# ロケール設定
+# Locale Settings
 RUN locale-gen ja_JP.UTF-8
 ENV LANG=ja_JP.UTF-8
 ENV LANGUAGE=ja_JP:ja
 ENV LC_ALL=ja_JP.UTF-8
 
-# Spyder用フォントキャッシュ更新
+# Spyder Font Cache Update
 RUN case "$ENVIRONMENT" in \
     (spyder|spyder-gpu) fc-cache -fv ;; \
     esac
 
-# sudoers設定
+# sudoers configuration
 RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers 
 
 USER ubuntu
 WORKDIR /home/ubuntu
 
-# Pixiインストール
+# Pixi Installation
 RUN curl -fsSL https://pixi.sh/install.sh | bash
 
 ENV PATH="/home/ubuntu/.pixi/bin:$PATH"
 
-# Spyder用IME設定
+# Spyder IME Settings
 ENV GTK_IM_MODULE=fcitx
 ENV QT_IM_MODULE=fcitx
 ENV XMODIFIERS=@im=fcitx
 ENV DefaultIMModule=fcitx
 
-# entrypoint.shのコピー
+# Copy entrypoint.sh
 COPY --chown=ubuntu:ubuntu entrypoint.sh /home/ubuntu/entrypoint.sh
 RUN chmod +x /home/ubuntu/entrypoint.sh
 

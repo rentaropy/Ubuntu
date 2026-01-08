@@ -37,8 +37,8 @@ echo "-> Selected Environment: $SELECTED_ENV"
 
 # 2. Python Version Input
 echo ""
-read -p "2. Enter Python Version [default: 3.14.*]: " input_python
-PYTHON_VERSION=${input_python:-"3.14.*"}
+read -p "2. Enter Python Version [default: 3.12.*]: " input_python
+PYTHON_VERSION=${input_python:-"3.12.*"}
 echo "-> Python Version: $PYTHON_VERSION"
 
 # 3. CPU Base Image

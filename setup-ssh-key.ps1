@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    SSH Key & Git Environment Setup Script (Windows & WSL Sync Edition)
+    SSH Key & Git Environment Setup Script (Windows & WSL Sync Edition - Fix Perms)
 .DESCRIPTION
     管理者権限の自動昇格を行い、SSH鍵作成、GitHub認証、WSLへの設定・鍵同期を対話的に行います。
 #>
@@ -243,22 +243,40 @@ $ScriptContent = @'
 
                 Write-Host "WSL側で権限(chmod)を修正中..." -ForegroundColor Yellow
                 
-                # UNCパスからDistro名を抽出して、正しいDistroでchmodを実行する試み
-                $distroName = "Ubuntu" # デフォルトフォールバック
+                # --- 権限修正ロジックの強化 ---
+                # 1. Distro名の抽出
+                $distroName = "Ubuntu" 
                 if ($destPath -match '^\\\\wsl\.localhost\\([^\\]+)\\') {
                     $distroName = $matches[1]
                 }
                 
                 try {
-                    # ディレクトリ権限 700
-                    wsl -d $distroName chmod 700 ~/.ssh
-                    # 秘密鍵権限 600 (id_ed25519 等)
-                    wsl -d $distroName find ~/.ssh -type f -exec chmod 600 {} +
+                    # 2. Windowsパス($destPath)をWSL内部のLinuxパスに変換
+                    # これにより、ユーザーがどのパスを指定しても正確なターゲットを取得
+                    $linuxPath = wsl -d $distroName wslpath -u "$destPath"
+                    $linuxPath = $linuxPath.Trim()
                     
-                    Write-Host "SSH鍵を同期し、権限を修正しました(Distro: $distroName)。" -ForegroundColor Green
+                    Write-Host "ターゲットDistro: $distroName" -ForegroundColor Gray
+                    Write-Host "Linuxパス: $linuxPath" -ForegroundColor Gray
+
+                    # 3. 具体的なファイルに対してchmodを実行 (再帰的findよりも確実)
+                    # ディレクトリ権限
+                    wsl -d $distroName chmod 700 "$linuxPath"
+                    
+                    # 秘密鍵権限 (600: 自分だけ読み書き可能)
+                    # *ワイルドカードを使うとknown_hostsなども巻き込むため、主要な鍵名を指定
+                    wsl -d $distroName chmod 600 "$linuxPath/id_ed25519"
+                    wsl -d $distroName chmod 600 "$linuxPath/id_rsa" 2>$null # 存在すれば
+                    
+                    # 公開鍵・known_hosts権限 (644: 自分は読み書き、他人は読むだけ)
+                    wsl -d $distroName chmod 644 "$linuxPath/id_ed25519.pub"
+                    wsl -d $distroName chmod 644 "$linuxPath/known_hosts"
+                    wsl -d $distroName chmod 644 "$linuxPath/config" 2>$null
+                    
+                    Write-Host "SSH鍵の権限を修正しました (600)。" -ForegroundColor Green
                 } catch {
-                    Write-Host "権限の修正コマンドでエラーが発生しましたが、ファイルはコピーされました。" -ForegroundColor Yellow
-                    Write-Host "詳細: $_" -ForegroundColor Red
+                    Write-Host "権限修正中にエラーが発生しました: $_" -ForegroundColor Red
+                    Write-Host "手動で 'chmod 600 ~/.ssh/id_ed25519' を実行してください。" -ForegroundColor Yellow
                 }
             }
         } else {

@@ -184,15 +184,24 @@ $ScriptContent = @'
                 if ([string]::IsNullOrWhiteSpace($gitName) -or [string]::IsNullOrWhiteSpace($gitEmail)) {
                     Write-Host "Windows側にGit設定が見つかりません。スキップします。" -ForegroundColor Yellow
                 } else {
-                    Write-Host "WSL(デフォルトDistro)に設定を適用中..." -ForegroundColor Yellow
-                    wsl git config --global user.name "$gitName"
-                    wsl git config --global user.email "$gitEmail"
+                    # --- ディストリビューション選択 ---
+                    $defaultDistro = "Ubuntu"
+                    Write-Host "設定を適用するWSLディストリビューション名を入力してください" -ForegroundColor Yellow
+                    $distroInput = Read-Host "ディストリビューション名 (空欄でデフォルト: $defaultDistro)"
+                    
+                    $targetDistro = if ([string]::IsNullOrWhiteSpace($distroInput)) { $defaultDistro } else { $distroInput }
+
+                    Write-Host "WSL ($targetDistro) に設定を適用中..." -ForegroundColor Yellow
+                    
+                    # -d オプションで指定したディストリビューションで実行
+                    wsl -d $targetDistro git config --global user.name "$gitName"
+                    wsl -d $targetDistro git config --global user.email "$gitEmail"
                     
                     # Windows側のCredential ManagerをWSLで使えるように設定
                     $credHelperPath = "/mnt/c/Program\ Files/Git/mingw64/libexec/git-core/git-credential-manager.exe"
-                    wsl git config --global credential.helper "$credHelperPath"
+                    wsl -d $targetDistro git config --global credential.helper "$credHelperPath"
                     
-                    Write-Host "Git設定とCredential HelperをWSLに同期しました。" -ForegroundColor Green
+                    Write-Host "Git設定とCredential HelperをWSL ($targetDistro) に同期しました。" -ForegroundColor Green
                 }
             } catch {
                 Write-Host "Git設定の同期に失敗しました: $_" -ForegroundColor Red

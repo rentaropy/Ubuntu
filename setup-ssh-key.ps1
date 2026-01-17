@@ -2,25 +2,20 @@
 .SYNOPSIS
     SSH Key & Git Environment Setup Script (IEX/One-liner Compatible)
 .DESCRIPTION
-    管理者権限の自動昇格（Tempファイル経由）を行い、
-    SSH鍵生成、Git/GitHub CLIインストール、初期設定を一括で行います。
+    管理者権限の自動昇格を行い、SSH鍵識別子とリポジトリURLを対話的に決定して環境構築を行います。
 #>
 
 # ==========================================
-# メインロジック（実行したい処理の中身）
+# メインロジック
 # ==========================================
 $ScriptContent = @'
     # --- 管理者権限で実行される内部ブロック ---
 
-    # エラーハンドリング設定（基本はStopだが、個別に制御する）
     $ErrorActionPreference = "Stop"
-    
-    # 文字化け防止
     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
     # === 関数定義 ===
 
-    # ヘルパー関数: ユーザー確認
     function Get-UserConfirmation {
         param([string]$Message)
         while ($true) {
@@ -31,7 +26,6 @@ $ScriptContent = @'
         }
     }
 
-    # ヘルパー関数: PATHの手動追加
     function Ensure-Path {
         param([string]$PathToAdd, [string]$ProgramName)
         $pathArray = $env:Path -split ';'
@@ -43,8 +37,24 @@ $ScriptContent = @'
 
     try {
         Write-Host "`n=== 環境セットアップを開始します ===" -ForegroundColor Cyan
-        $hostname = $env:COMPUTERNAME
-        Write-Host "ホスト名: $hostname" -ForegroundColor Gray
+        
+        # ----------------------------------
+        # 0. 設定値の対話的入力
+        # ----------------------------------
+        Write-Host "`n[0/6] 設定の入力" -ForegroundColor Cyan
+        
+        # 1. SSHキー識別子 (キーのコメントおよびGitHub上のタイトルになります)
+        $defaultId = "$($env:COMPUTERNAME)-$(Get-Date -Format 'yyyyMMdd')"
+        Write-Host "SSHキーの識別子を入力してください。" -ForegroundColor Yellow
+        Write-Host "これはキーのコメントとGitHub上のタイトルに使用されます。" -ForegroundColor Gray
+        $keyIdInput = Read-Host "識別子 (空白でデフォルト: $defaultId)"
+        
+        if ([string]::IsNullOrWhiteSpace($keyIdInput)) {
+            $keyIdentifier = $defaultId
+        } else {
+            $keyIdentifier = $keyIdInput
+        }
+        Write-Host "使用する識別子: $keyIdentifier" -ForegroundColor Green
 
         # ----------------------------------
         # 1. SSH鍵の作成
@@ -65,7 +75,8 @@ $ScriptContent = @'
 
         if (-not (Test-Path $keyPath)) {
             Write-Host "SSH鍵を生成中..." -ForegroundColor Yellow
-            ssh-keygen -t ed25519 -C $hostname -f $keyPath -N '""'
+            # -C に入力された識別子を使用
+            ssh-keygen -t ed25519 -C "$keyIdentifier" -f $keyPath -N '""'
             if ($LASTEXITCODE -ne 0) { throw "SSH鍵の生成に失敗しました。" }
             Write-Host "SSH鍵を生成しました。" -ForegroundColor Green
         } else {
@@ -107,11 +118,9 @@ $ScriptContent = @'
         # ----------------------------------
         Write-Host "`n[4/6] GitHub認証とSSH鍵登録" -ForegroundColor Cyan
         
-        # エラーで止まらないように一時的に設定変更
         $CurrentErrorAction = $ErrorActionPreference
         $ErrorActionPreference = "Continue"
 
-        # 一旦ログアウト
         gh auth logout --hostname github.com 2>&1 | Out-Null
 
         Write-Host "GitHubにログインします。" -ForegroundColor Yellow
@@ -119,26 +128,22 @@ $ScriptContent = @'
         Write-Host "準備ができたらEnterキーを押してください..." -NoNewline
         $null = Read-Host
 
-        # ログイン実行
         gh auth login --hostname github.com --git-protocol ssh --web --skip-ssh-key --clipboard --scopes "admin:public_key"
         
-        Write-Host "`nブラウザでの操作が完了するのを待っています..." -ForegroundColor Yellow
+        Write-Host "`nブラウザでの操作完了待ち..." -ForegroundColor Yellow
         Write-Host "完了したら Enter キーを押してください..." -ForegroundColor Yellow
         $null = Read-Host
 
-        # 認証状態を確認 (ここでエラーになってもcatchに行かないようContinueのまま実行)
         $authStatus = gh auth status 2>&1 | Out-String
         
         if ($authStatus -match "Logged in") {
              Write-Host "認証を確認しました。" -ForegroundColor Green
         } else {
-             # 設定を戻してからthrowする
              $ErrorActionPreference = $CurrentErrorAction
              Write-Host "認証状態: $authStatus" -ForegroundColor Red
              throw "GitHub認証が完了していません。再度実行してください。"
         }
         
-        # 設定を元に戻す
         $ErrorActionPreference = $CurrentErrorAction
 
         # 公開鍵登録
@@ -147,9 +152,9 @@ $ScriptContent = @'
         
         $pubKeyContent = Get-Content $pubKeyPath -Raw
         
-        # ここもエラーハンドリングを独自に行う
         $ErrorActionPreference = "Continue"
-        $uploadOutput = $pubKeyContent | gh ssh-key add - --title "$hostname-$(Get-Date -Format 'yyyyMMdd')" --type authentication 2>&1
+        # --title に入力された識別子を使用
+        $uploadOutput = $pubKeyContent | gh ssh-key add - --title "$keyIdentifier" --type authentication 2>&1
         $uploadResult = $LASTEXITCODE
         $ErrorActionPreference = $CurrentErrorAction
         
@@ -159,11 +164,10 @@ $ScriptContent = @'
             Write-Host "この鍵は既に登録済みです。" -ForegroundColor Green
         } else {
             Write-Host "鍵登録警告: $uploadOutput" -ForegroundColor Yellow
-            # 致命的ではないため続行
         }
 
         # ----------------------------------
-        # 5. リポジトリのクローン
+        # 5. リポジトリのクローン (対話的入力)
         # ----------------------------------
         Write-Host "`n[5/6] プロジェクトのセットアップ" -ForegroundColor Cyan
         
@@ -171,18 +175,31 @@ $ScriptContent = @'
         if (-not (Test-Path $projectsPath)) { New-Item -ItemType Directory -Path $projectsPath -Force | Out-Null }
         Set-Location $projectsPath
         
-        $repoUrl = "git@github.com:EBP-Japan/ebp-whisper.git"
-        $repoName = "ebp-whisper"
+        # リポジトリURLの入力
+        while ($true) {
+            Write-Host "クローンするリポジトリのURLを入力してください" -ForegroundColor Yellow
+            Write-Host "(例: git@github.com:EBP-Japan/ebp-whisper.git)" -ForegroundColor Gray
+            $repoUrl = Read-Host "URL"
+            if (-not [string]::IsNullOrWhiteSpace($repoUrl)) { break }
+        }
+
+        # URLからフォルダ名を抽出 (末尾の .git を削除し、最後のスラッシュ以降を取得)
+        $repoName = ($repoUrl -split '/')[-1] -replace '\.git$', ''
         $repoPath = Join-Path $projectsPath $repoName
 
+        Write-Host "ターゲットフォルダ: $repoName" -ForegroundColor Gray
+
         if (Test-Path $repoPath) {
-            Write-Host "リポジトリフォルダが既に存在します。" -ForegroundColor Yellow
+            Write-Host "フォルダ '$repoName' が既に存在します。" -ForegroundColor Yellow
             if (Get-UserConfirmation "削除して再クローンしますか？") {
                 Remove-Item $repoPath -Recurse -Force
+                Write-Host "クローン中: $repoUrl" -ForegroundColor Yellow
                 git clone $repoUrl
+            } else {
+                 Write-Host "既存のフォルダを使用します。" -ForegroundColor Green
             }
         } else {
-            Write-Host "リポジトリをクローン中..." -ForegroundColor Yellow
+            Write-Host "クローン中: $repoUrl" -ForegroundColor Yellow
             git clone $repoUrl
         }
         

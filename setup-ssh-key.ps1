@@ -2,7 +2,7 @@
 .SYNOPSIS
     SSH Key & Git Environment Setup Script (IEX/One-liner Compatible)
 .DESCRIPTION
-    管理者権限の自動昇格を行い、SSH鍵識別子(必須)とリポジトリURL(任意)を対話的に決定して環境構築を行います。
+    管理者権限の自動昇格を行い、SSH鍵識別子(必須)、リポジトリURL(任意)、保存先パス(任意)を対話的に決定して環境構築を行います。
 #>
 
 # ==========================================
@@ -75,7 +75,6 @@ $ScriptContent = @'
 
         if (-not (Test-Path $keyPath)) {
             Write-Host "SSH鍵を生成中..." -ForegroundColor Yellow
-            # -C に入力された識別子を使用
             ssh-keygen -t ed25519 -C "$keyIdentifier" -f $keyPath -N '""'
             if ($LASTEXITCODE -ne 0) { throw "SSH鍵の生成に失敗しました。" }
             Write-Host "SSH鍵を生成しました。" -ForegroundColor Green
@@ -153,7 +152,6 @@ $ScriptContent = @'
         $pubKeyContent = Get-Content $pubKeyPath -Raw
         
         $ErrorActionPreference = "Continue"
-        # --title に入力された識別子を使用
         $uploadOutput = $pubKeyContent | gh ssh-key add - --title "$keyIdentifier" --type authentication 2>&1
         $uploadResult = $LASTEXITCODE
         $ErrorActionPreference = $CurrentErrorAction
@@ -175,18 +173,37 @@ $ScriptContent = @'
         Write-Host "(空欄のままEnterを押すと、クローンを行わずに終了します)" -ForegroundColor Gray
         $repoUrl = Read-Host "URL"
 
+        # 変数初期化（最終表示用）
+        $finalRepoPath = ""
+
         # URLが入力された場合のみ実行
         if (-not [string]::IsNullOrWhiteSpace($repoUrl)) {
             
-            $projectsPath = Join-Path $env:USERPROFILE "projects"
-            if (-not (Test-Path $projectsPath)) { New-Item -ItemType Directory -Path $projectsPath -Force | Out-Null }
+            # --- 保存先フォルダの選択 ---
+            $defaultParentPath = Join-Path $env:USERPROFILE "projects"
+            
+            Write-Host "`n保存先の親フォルダを入力してください。" -ForegroundColor Yellow
+            $parentPathInput = Read-Host "パス (空白でデフォルト: $defaultParentPath)"
+            
+            if ([string]::IsNullOrWhiteSpace($parentPathInput)) {
+                $projectsPath = $defaultParentPath
+            } else {
+                # 環境変数の展開（%USERPROFILE%などに対応）
+                $projectsPath = [System.Environment]::ExpandEnvironmentVariables($parentPathInput)
+            }
+
+            if (-not (Test-Path $projectsPath)) {
+                New-Item -ItemType Directory -Path $projectsPath -Force | Out-Null
+                Write-Host "保存先フォルダを作成しました: $projectsPath" -ForegroundColor Green
+            }
             Set-Location $projectsPath
 
             # URLからフォルダ名を抽出
             $repoName = ($repoUrl -split '/')[-1] -replace '\.git$', ''
             $repoPath = Join-Path $projectsPath $repoName
+            $finalRepoPath = $repoPath # 最終表示用に保持
 
-            Write-Host "ターゲットフォルダ: $repoName" -ForegroundColor Gray
+            Write-Host "ターゲット: $repoPath" -ForegroundColor Gray
 
             if (Test-Path $repoPath) {
                 Write-Host "フォルダ '$repoName' が既に存在します。" -ForegroundColor Yellow
@@ -233,6 +250,15 @@ $ScriptContent = @'
         }
 
         Write-Host "`n=== すべての処理が完了しました ===" -ForegroundColor Green
+        
+        # --- 最終結果の表示 ---
+        if (-not [string]::IsNullOrWhiteSpace($finalRepoPath) -and (Test-Path $finalRepoPath)) {
+            Write-Host "`n[INFO] 以下のディレクトリにクローンされました:" -ForegroundColor Cyan
+            Write-Host "--------------------------------------------------" -ForegroundColor Gray
+            Write-Host $finalRepoPath -ForegroundColor White
+            Write-Host "--------------------------------------------------" -ForegroundColor Gray
+        }
+
         Write-Host "Enterキーを押して終了してください..."
         $null = Read-Host
 

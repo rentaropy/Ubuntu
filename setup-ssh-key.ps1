@@ -2,7 +2,7 @@
 .SYNOPSIS
     SSH Key & Git Environment Setup Script (Windows & WSL Sync Edition)
 .DESCRIPTION
-    管理者権限の自動昇格を行い、SSH鍵作成、GitHub認証、Git Clone、WSLへの設定・鍵同期を対話的に行います。
+    管理者権限の自動昇格を行い、SSH鍵作成、GitHub認証、WSLへの設定・鍵同期を対話的に行います。
 #>
 
 # ==========================================
@@ -41,7 +41,7 @@ $ScriptContent = @'
         # ----------------------------------
         # 0. 設定値の対話的入力
         # ----------------------------------
-        Write-Host "`n[0/9] 設定の入力" -ForegroundColor Cyan
+        Write-Host "`n[0/7] 設定の入力" -ForegroundColor Cyan
         
         # 1. SSHキー識別子 (入力必須)
         Write-Host "SSHキーの識別子を入力してください。" -ForegroundColor Yellow
@@ -59,7 +59,7 @@ $ScriptContent = @'
         # ----------------------------------
         # 1. SSH鍵の作成
         # ----------------------------------
-        Write-Host "`n[1/9] SSH鍵の作成" -ForegroundColor Cyan
+        Write-Host "`n[1/7] SSH鍵の作成" -ForegroundColor Cyan
         $sshDir = Join-Path $env:USERPROFILE ".ssh"
         $keyPath = Join-Path $sshDir "id_ed25519"
         $pubKeyPath = "$keyPath.pub"
@@ -85,7 +85,7 @@ $ScriptContent = @'
         # ----------------------------------
         # 2. Gitのインストール
         # ----------------------------------
-        Write-Host "`n[2/9] Gitのインストール確認" -ForegroundColor Cyan
+        Write-Host "`n[2/7] Gitのインストール確認" -ForegroundColor Cyan
         if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
             Write-Host "Gitをインストール中..." -ForegroundColor Yellow
             winget install --id Git.Git --silent --accept-source-agreements --accept-package-agreements
@@ -100,7 +100,7 @@ $ScriptContent = @'
         # ----------------------------------
         # 3. GitHub CLIのインストール
         # ----------------------------------
-        Write-Host "`n[3/9] GitHub CLIのインストール確認" -ForegroundColor Cyan
+        Write-Host "`n[3/7] GitHub CLIのインストール確認" -ForegroundColor Cyan
         if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
             Write-Host "GitHub CLIをインストール中..." -ForegroundColor Yellow
             winget install --id GitHub.cli --silent --accept-source-agreements --accept-package-agreements
@@ -115,7 +115,7 @@ $ScriptContent = @'
         # ----------------------------------
         # 4. GitHub CLI認証 & 公開鍵登録
         # ----------------------------------
-        Write-Host "`n[4/9] GitHub認証とSSH鍵登録" -ForegroundColor Cyan
+        Write-Host "`n[4/7] GitHub認証とSSH鍵登録" -ForegroundColor Cyan
         
         $CurrentErrorAction = $ErrorActionPreference
         $ErrorActionPreference = "Continue"
@@ -165,35 +165,130 @@ $ScriptContent = @'
         }
 
         # ----------------------------------
-        # 5. リポジトリのクローン (任意入力)
+        # 5. WSL Safe Directory 設定
         # ----------------------------------
-        Write-Host "`n[5/9] プロジェクトのセットアップ" -ForegroundColor Cyan
+        Write-Host "`n[5/7] WSL Safe Directory設定" -ForegroundColor Cyan
+        git config --global --add safe.directory //wsl.localhost/*
+        Write-Host "WSL全般のパス(//wsl.localhost/*)をsafe.directoryに追加しました。" -ForegroundColor Green
+
+        # ----------------------------------
+        # 6. Git Config (User/Email) 同期
+        # ----------------------------------
+        Write-Host "`n[6/7] WSLへのGit設定同期 (任意)" -ForegroundColor Cyan
         
-        Write-Host "クローンするリポジトリのURLを入力してください" -ForegroundColor Yellow
-        Write-Host "(空欄のままEnterを押すと、クローンを行わずに終了します)" -ForegroundColor Gray
-        $repoUrl = Read-Host "URL"
+        if (Get-UserConfirmation "WindowsのGit設定(User/Email)と認証情報をWSL側にコピーしますか？") {
+            try {
+                $gitName = git config --global user.name
+                $gitEmail = git config --global user.email
+                
+                if ([string]::IsNullOrWhiteSpace($gitName) -or [string]::IsNullOrWhiteSpace($gitEmail)) {
+                    Write-Host "Windows側にGit設定が見つかりません。スキップします。" -ForegroundColor Yellow
+                } else {
+                    Write-Host "WSL(デフォルトDistro)に設定を適用中..." -ForegroundColor Yellow
+                    wsl git config --global user.name "$gitName"
+                    wsl git config --global user.email "$gitEmail"
+                    
+                    # Windows側のCredential ManagerをWSLで使えるように設定
+                    $credHelperPath = "/mnt/c/Program\ Files/Git/mingw64/libexec/git-core/git-credential-manager.exe"
+                    wsl git config --global credential.helper "$credHelperPath"
+                    
+                    Write-Host "Git設定とCredential HelperをWSLに同期しました。" -ForegroundColor Green
+                }
+            } catch {
+                Write-Host "Git設定の同期に失敗しました: $_" -ForegroundColor Red
+            }
+        } else {
+            Write-Host "Git設定の同期をスキップしました。" -ForegroundColor Gray
+        }
 
-        # 変数初期化（最終表示用）
-        $finalRepoPath = ""
+        # ----------------------------------
+        # 7. SSH鍵のWSL同期
+        # ----------------------------------
+        Write-Host "`n[7/7] SSH鍵のWSL同期 (任意)" -ForegroundColor Cyan
 
-        # URLが入力された場合のみ実行
-        if (-not [string]::IsNullOrWhiteSpace($repoUrl)) {
+        if (Get-UserConfirmation "SSH鍵(.ssh)をWindowsからWSLに同期しますか？") {
             
-            # --- 保存先フォルダの選択 ---
-            $defaultParentPath = Join-Path $env:USERPROFILE "projects"
+            # --- パス入力 (デフォルト値あり) ---
+            $winDefault = Join-Path $env:USERPROFILE ".ssh"
+            # 要求されたデフォルトパス
+            $wslDefault = "\\wsl.localhost\Ubuntu\home\ubuntu\.ssh"
+
+            Write-Host "パスを確認してください (空欄でデフォルト値を使用)" -ForegroundColor Yellow
             
-            Write-Host "`n保存先の親フォルダを入力してください。" -ForegroundColor Yellow
-            $parentPathInput = Read-Host "パス (空白でデフォルト: $defaultParentPath)"
-            
-            if ([string]::IsNullOrWhiteSpace($parentPathInput)) {
-                $projectsPath = $defaultParentPath
+            $srcPath = Read-Host "コピー元 (Windows) [$winDefault]"
+            if ([string]::IsNullOrWhiteSpace($srcPath)) { $srcPath = $winDefault }
+
+            $destPath = Read-Host "コピー先 (WSL)     [$wslDefault]"
+            if ([string]::IsNullOrWhiteSpace($destPath)) { $destPath = $wslDefault }
+
+            if (-not (Test-Path $srcPath)) {
+                Write-Host "コピー元が見つかりません: $srcPath" -ForegroundColor Red
             } else {
-                # 環境変数の展開（%USERPROFILE%などに対応）
-                $projectsPath = [System.Environment]::ExpandEnvironmentVariables($parentPathInput)
-            }
+                if (-not (Test-Path $destPath)) {
+                    Write-Host "コピー先ディレクトリを作成中..." -ForegroundColor Gray
+                    New-Item -ItemType Directory -Path $destPath -Force | Out-Null
+                }
 
-            if (-not (Test-Path $projectsPath)) {
-                New-Item -ItemType Directory -Path $projectsPath -Force | Out-Null
-                Write-Host "保存先フォルダを作成しました: $projectsPath" -ForegroundColor Green
+                Write-Host "ファイルをコピー中..." -ForegroundColor Yellow
+                Copy-Item "$srcPath\*" -Destination $destPath -Recurse -Force
+
+                Write-Host "WSL側で権限(chmod)を修正中..." -ForegroundColor Yellow
+                
+                # UNCパスからDistro名を抽出して、正しいDistroでchmodを実行する試み
+                $distroName = "Ubuntu" # デフォルトフォールバック
+                if ($destPath -match '^\\\\wsl\.localhost\\([^\\]+)\\') {
+                    $distroName = $matches[1]
+                }
+                
+                try {
+                    # ディレクトリ権限 700
+                    wsl -d $distroName chmod 700 ~/.ssh
+                    # 秘密鍵権限 600 (id_ed25519 等)
+                    wsl -d $distroName find ~/.ssh -type f -exec chmod 600 {} +
+                    
+                    Write-Host "SSH鍵を同期し、権限を修正しました(Distro: $distroName)。" -ForegroundColor Green
+                } catch {
+                    Write-Host "権限の修正コマンドでエラーが発生しましたが、ファイルはコピーされました。" -ForegroundColor Yellow
+                    Write-Host "詳細: $_" -ForegroundColor Red
+                }
             }
-            Set-Location
+        } else {
+            Write-Host "SSH鍵の同期をスキップしました。" -ForegroundColor Gray
+        }
+
+        Write-Host "`n=== すべての処理が完了しました ===" -ForegroundColor Green
+        Write-Host "Enterキーを押して終了してください..."
+        $null = Read-Host
+
+    } catch {
+        Write-Host "`n[エラー] 処理中にエラーが発生しました:" -ForegroundColor Red
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        Write-Host "Enterキーを押して終了してください..."
+        $null = Read-Host
+        exit 1
+    }
+'@
+
+# ==========================================
+# 権限昇格ラッパー
+# ==========================================
+$isAdmin = [bool]([Security.Principal.WindowsIdentity]::GetCurrent().Groups -match 'S-1-5-32-544')
+
+if ($isAdmin) {
+    Invoke-Expression $ScriptContent
+} else {
+    Write-Host "管理者権限が必要です。権限昇格を準備しています..." -ForegroundColor Yellow
+    $rand = [Guid]::NewGuid().Guid
+    $TempScript = Join-Path $env:TEMP "Setup-SSH-Elevated-$rand.ps1"
+    Set-Content -Path $TempScript -Value $ScriptContent -Encoding UTF8
+    
+    try {
+        Start-Process -FilePath "powershell.exe" `
+            -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$TempScript`"" `
+            -Verb RunAs -Wait
+    } catch {
+        Write-Host "管理者権限への昇格が失敗しました。" -ForegroundColor Red
+    }
+    
+    if (Test-Path $TempScript) { Remove-Item $TempScript -Force -ErrorAction SilentlyContinue }
+}

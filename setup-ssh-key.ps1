@@ -2,7 +2,7 @@
 .SYNOPSIS
     SSH Key & Git Environment Setup Script (IEX/One-liner Compatible)
 .DESCRIPTION
-    管理者権限の自動昇格を行い、SSH鍵識別子とリポジトリURLを対話的に決定して環境構築を行います。
+    管理者権限の自動昇格を行い、SSH鍵識別子(必須)とリポジトリURL(任意)を対話的に決定して環境構築を行います。
 #>
 
 # ==========================================
@@ -43,16 +43,16 @@ $ScriptContent = @'
         # ----------------------------------
         Write-Host "`n[0/6] 設定の入力" -ForegroundColor Cyan
         
-        # 1. SSHキー識別子 (キーのコメントおよびGitHub上のタイトルになります)
-        $defaultId = "$($env:COMPUTERNAME)-$(Get-Date -Format 'yyyyMMdd')"
+        # 1. SSHキー識別子 (入力必須)
         Write-Host "SSHキーの識別子を入力してください。" -ForegroundColor Yellow
         Write-Host "これはキーのコメントとGitHub上のタイトルに使用されます。" -ForegroundColor Gray
-        $keyIdInput = Read-Host "識別子 (空白でデフォルト: $defaultId)"
         
-        if ([string]::IsNullOrWhiteSpace($keyIdInput)) {
-            $keyIdentifier = $defaultId
-        } else {
-            $keyIdentifier = $keyIdInput
+        $keyIdentifier = ""
+        while ([string]::IsNullOrWhiteSpace($keyIdentifier)) {
+            $keyIdentifier = Read-Host "識別子 (必須)"
+            if ([string]::IsNullOrWhiteSpace($keyIdentifier)) {
+                Write-Host "エラー: 識別子の入力は必須です。" -ForegroundColor Red
+            }
         }
         Write-Host "使用する識別子: $keyIdentifier" -ForegroundColor Green
 
@@ -167,64 +167,69 @@ $ScriptContent = @'
         }
 
         # ----------------------------------
-        # 5. リポジトリのクローン (対話的入力)
+        # 5. リポジトリのクローン (任意入力)
         # ----------------------------------
         Write-Host "`n[5/6] プロジェクトのセットアップ" -ForegroundColor Cyan
         
-        $projectsPath = Join-Path $env:USERPROFILE "projects"
-        if (-not (Test-Path $projectsPath)) { New-Item -ItemType Directory -Path $projectsPath -Force | Out-Null }
-        Set-Location $projectsPath
-        
-        # リポジトリURLの入力
-        while ($true) {
-            Write-Host "クローンするリポジトリのURLを入力してください" -ForegroundColor Yellow
-            Write-Host "(例: git@github.com:EBP-Japan/ebp-whisper.git)" -ForegroundColor Gray
-            $repoUrl = Read-Host "URL"
-            if (-not [string]::IsNullOrWhiteSpace($repoUrl)) { break }
-        }
+        Write-Host "クローンするリポジトリのURLを入力してください" -ForegroundColor Yellow
+        Write-Host "(空欄のままEnterを押すと、クローンを行わずに終了します)" -ForegroundColor Gray
+        $repoUrl = Read-Host "URL"
 
-        # URLからフォルダ名を抽出 (末尾の .git を削除し、最後のスラッシュ以降を取得)
-        $repoName = ($repoUrl -split '/')[-1] -replace '\.git$', ''
-        $repoPath = Join-Path $projectsPath $repoName
+        # URLが入力された場合のみ実行
+        if (-not [string]::IsNullOrWhiteSpace($repoUrl)) {
+            
+            $projectsPath = Join-Path $env:USERPROFILE "projects"
+            if (-not (Test-Path $projectsPath)) { New-Item -ItemType Directory -Path $projectsPath -Force | Out-Null }
+            Set-Location $projectsPath
 
-        Write-Host "ターゲットフォルダ: $repoName" -ForegroundColor Gray
+            # URLからフォルダ名を抽出
+            $repoName = ($repoUrl -split '/')[-1] -replace '\.git$', ''
+            $repoPath = Join-Path $projectsPath $repoName
 
-        if (Test-Path $repoPath) {
-            Write-Host "フォルダ '$repoName' が既に存在します。" -ForegroundColor Yellow
-            if (Get-UserConfirmation "削除して再クローンしますか？") {
-                Remove-Item $repoPath -Recurse -Force
-                Write-Host "クローン中: $repoUrl" -ForegroundColor Yellow
-                git clone $repoUrl
-            } else {
-                 Write-Host "既存のフォルダを使用します。" -ForegroundColor Green
-            }
-        } else {
-            Write-Host "クローン中: $repoUrl" -ForegroundColor Yellow
-            git clone $repoUrl
-        }
-        
-        if (-not (Test-Path $repoPath)) { throw "リポジトリの準備に失敗しました。" }
-        Set-Location $repoPath
+            Write-Host "ターゲットフォルダ: $repoName" -ForegroundColor Gray
 
-        # ----------------------------------
-        # 6. ブランチチェックアウト
-        # ----------------------------------
-        Write-Host "`n[6/6] ブランチの選択" -ForegroundColor Cyan
-        git fetch --all | Out-Null
-        
-        while ($true) {
-            $branchName = Read-Host "チェックアウトするブランチ名を入力してください"
-            if ([string]::IsNullOrWhiteSpace($branchName)) { continue }
-
-            if (git branch -r | Select-String "/$branchName$") {
-                git checkout $branchName
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Host "ブランチ '$branchName' に切り替えました。" -ForegroundColor Green
-                    break
+            if (Test-Path $repoPath) {
+                Write-Host "フォルダ '$repoName' が既に存在します。" -ForegroundColor Yellow
+                if (Get-UserConfirmation "削除して再クローンしますか？") {
+                    Remove-Item $repoPath -Recurse -Force
+                    Write-Host "クローン中: $repoUrl" -ForegroundColor Yellow
+                    git clone $repoUrl
+                } else {
+                    Write-Host "既存のフォルダを使用します。" -ForegroundColor Green
                 }
             } else {
-                Write-Host "リモートブランチが見つかりません。" -ForegroundColor Red
+                Write-Host "クローン中: $repoUrl" -ForegroundColor Yellow
+                git clone $repoUrl
             }
+            
+            if (-not (Test-Path $repoPath)) { 
+                Write-Host "リポジトリが見つからないため、ブランチ切り替えをスキップします。" -ForegroundColor Yellow 
+            } else {
+                Set-Location $repoPath
+
+                # ----------------------------------
+                # 6. ブランチチェックアウト
+                # ----------------------------------
+                Write-Host "`n[6/6] ブランチの選択" -ForegroundColor Cyan
+                git fetch --all | Out-Null
+                
+                while ($true) {
+                    $branchName = Read-Host "チェックアウトするブランチ名を入力してください"
+                    if ([string]::IsNullOrWhiteSpace($branchName)) { continue }
+
+                    if (git branch -r | Select-String "/$branchName$") {
+                        git checkout $branchName
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-Host "ブランチ '$branchName' に切り替えました。" -ForegroundColor Green
+                            break
+                        }
+                    } else {
+                        Write-Host "リモートブランチが見つかりません。" -ForegroundColor Red
+                    }
+                }
+            }
+        } else {
+            Write-Host "URLが入力されなかったため、リポジトリのセットアップをスキップします。" -ForegroundColor Green
         }
 
         Write-Host "`n=== すべての処理が完了しました ===" -ForegroundColor Green

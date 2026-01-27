@@ -251,6 +251,10 @@ $ScriptContent = @'
                 
                 try {
                     Write-Host "ターゲットDistro: $distroName" -ForegroundColor Gray
+
+                    # 0. 所有権の修正 (sudo chown ubuntu:ubuntu 相当)
+                    # -u root を使うことで、パスワード入力を回避しつつ確実に所有者を変更します
+                    wsl -d $distroName -u root chown -R ubuntu:ubuntu /home/ubuntu/.ssh
                     
                     # 1. ディレクトリ自体の権限 (700)
                     wsl -d $distroName chmod 700 ~/.ssh
@@ -305,3 +309,4 @@ if ($isAdmin) {
     
     if (Test-Path $TempScript) { Remove-Item $TempScript -Force -ErrorAction SilentlyContinue }
 }
+

@@ -172,6 +172,47 @@ $ScriptContent = @'
         Write-Host "WSL全般のパス(//wsl.localhost/*)をsafe.directoryに追加しました。" -ForegroundColor Green
 
         # ----------------------------------
+        # 5.5. wslgit（簡潔版）の配置（署名検証／PATH変更／確認なし）
+        # ----------------------------------
+        Write-Host "`n[5.5/7] wslgit（WSLラッパー）を設置します（簡潔版）" -ForegroundColor Cyan
+        
+        try {
+            $wslgitDir = Join-Path $env:USERPROFILE "wslgit"
+            if (-not (Test-Path $wslgitDir)) {
+                New-Item -ItemType Directory -Path $wslgitDir -Force | Out-Null
+                Write-Host "作業ディレクトリを作成しました: $wslgitDir" -ForegroundColor Green
+            } else {
+                Write-Host "既存のディレクトリを使用します: $wslgitDir" -ForegroundColor Gray
+            }
+        
+            # ダウンロードするファイル（個別ファイルを指定）
+            $files = @(
+                @{ Name = "bash.exe"; Url = "https://github.com/rentaropy/Ubuntu/raw/refs/heads/main/wslgit/bash.exe" },
+                @{ Name = "sh.exe";   Url = "https://github.com/rentaropy/Ubuntu/raw/refs/heads/main/wslgit/sh.exe" },
+                @{ Name = "git.exe";  Url = "https://github.com/rentaropy/Ubuntu/raw/refs/heads/main/wslgit/git.exe" }
+            )
+        
+            foreach ($f in $files) {
+                $dest = Join-Path $wslgitDir $f.Name
+                Write-Host "ダウンロード中: $($f.Name)" -ForegroundColor Yellow
+                Invoke-WebRequest -Uri $f.Url -OutFile $dest -UseBasicParsing -ErrorAction Stop
+        
+                # インターネットからの実行ファイルはブロックされることがあるため解除
+                Unblock-File -Path $dest -ErrorAction SilentlyContinue
+                Write-Host "配置しました: $dest" -ForegroundColor Green
+            }
+        
+            Write-Host "wslgit ファイルの配置が完了しました。Fork の Git Instance を手動で設定してください：" -ForegroundColor Cyan
+            Write-Host "File > Preferences > Git > Git Instance > Custom Git Instance... で" -ForegroundColor Cyan
+            Write-Host "`"$env:USERPROFILE\\wslgit\\git.exe`"" -ForegroundColor Yellow
+        
+        } catch {
+            Write-Host "wslgit の配置中にエラーが発生しました: $_" -ForegroundColor Red
+            Write-Host "必要に応じて上記の URL から手動でファイルを取得して $wslgitDir に配置してください。" -ForegroundColor Yellow
+            throw
+        }
+
+        # ----------------------------------
         # 6. Git Config (User/Email) 同期
         # ----------------------------------
         Write-Host "`n[6/7] WSLへのGit設定同期 (任意)" -ForegroundColor Cyan
@@ -309,4 +350,5 @@ if ($isAdmin) {
     
     if (Test-Path $TempScript) { Remove-Item $TempScript -Force -ErrorAction SilentlyContinue }
 }
+
 
